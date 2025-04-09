@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cât de mult influențează prezența rezultatele la alegeri</title>
+  <!-- Import Roboto and Playfair Display fonts from Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    
+    *, *:before, *:after {
+      box-sizing: border-box;
+    }
+
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+      overflow-x: hidden;
+    }
+   
+    .supratitle {
+      text-align: center;
+      font-size: 1.5em;
+      font-weight: 300;
+      color: #000000;
+      margin-top: 20px;
+      padding-top: 10vw;
+    }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      text-align: center;
+      padding: 0 5vw;
+      margin: 0.5em 0 0;
+      font-size: 2em;
+      font-weight: 500;
+    }
+    
+    .text-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 5vw;
+      padding-top: 10vw;
+    }
+    p {
+      text-align: center;
+      font-size: 1em;
+      margin: 1em 0;
+    }
+    .chart-wrapper {
+      position: relative;
+      height: 100dvh;
+    }
+    .chart-container {
+      position: sticky;
+      top: 0;
+      height: 100dvh;
+      width: 100%;
+      background: white;
+      z-index: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .svg-inner {
+      width: 100%;
+      max-width: 1000px;
+      
+      position: relative;
+    }
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .tooltip, .scatter-tooltip {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid #aaa;
+      padding: 0.5em 0.75em;
+      font-size: 0.9em;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
+      max-width: 90vw;
+      
+      min-width: 80px;
+    }
+    .candidate-label {
+      font-size: 0.9em;
+      fill: #333;
+    }
+    circle:hover {
+      cursor: pointer;
+    }
+    
+    .top-spacer {
+      height: 15vh;
+    }
+    
+    #explanation {
+      padding: 20px;
+      text-align: center;
+      font-size: 1em;
+      background: #ffffff;
+      margin: 20px 0;
+    }
+    #scatter-plots {
+      padding: 10px;
+      background: #ffffff;
+      text-align: center;
+    }
+    #scatter-plots h2 {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+    }
+    
+    .scatter-svg-container {
+      max-width: 800px;
+      margin: 0 auto 40px auto;
+      text-align: left;
+    }
+    
+    .data-filter {
+      margin-bottom: 5px;
+      padding: 3px;
+      font-size: 0.8em;
+    }
+    
+    .scatter-svg-container svg .x-label,
+    .scatter-svg-container svg .y-label {
+      font-size: 1em;
+    }
+    
+    @media (max-width: 768px) {
+      .top-spacer {
+        height: 15vh;
+      }
+      .scatter-svg-container {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .scatter-svg-container svg .x-label,
+      .scatter-svg-container svg .y-label {
+        font-size: 0.7em;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="supratitle">Alegeri prezidentiale</div>
+  <h1>Cât de mult influențează prezența rezultatele la alegeri</h1>
+  <div class="text-container">
+    <p>
+      În acest material interactiv am corelat 
+      <span style="background-color:rgb(255, 255, 255); color:rgb(0, 0, 0); padding:2px 6px; font-weight:bold;">rezultatele obținute în țară</span> 
+      în primul tur al alegerilor prezidențiale din 
+      <span style="background-color:rgb(255, 255, 255); color:rgb(0, 0, 0); padding:2px 6px; font-weight:bold;">anul 2024</span>. 
+      Am reprezentat distribuția comunelor din punct de vedere al rezultatelor și procentului de prezență, 
+      pentru a vedea dacă există corelații între procentele obținute de candidați și mobilizarea electoratului. <br>
+      <span style="background-color:rgb(255, 255, 255); color:rgb(0, 0, 0); padding:2px 6px; font-weight:bold;">Scroll</span>pentru a urmări materialul.
+    </p>
+  </div>
+
+  <div class="top-spacer"></div>
+  
+  
+  <div id="search-container" style="text-align: center; margin-bottom: 5px;">
+    <input 
+      type="text" 
+      id="search-input" 
+      placeholder="Caută localitate…" 
+      style="padding: 6px 12px; font-size: 1em; width: 250px; max-width: 90%; border: 1px solid #ccc; border-radius: 5px;" 
+      list="localitati-list"
+    >
+    <button id="clear-search" style="padding: 6px 10px; font-size: 1em; margin-left: 6px;">Reset</button>
+    <datalist id="localitati-list"></datalist>
+  </div>
+  <div class="chart-wrapper">
+    <div class="chart-container">
+      <div class="svg-inner">
+        <svg id="viz" viewBox="0 0 1000 700" preserveAspectRatio="xMinYMin meet"></svg>
+      </div>
+    </div>
+  </div>
+  
+  <div class="tooltip" id="tooltip"></div>
+  <!-- Extra spacer to allow scrolling past the visualization -->
+  <div style="height: 5dvh;"></div>
+
+  <!-- Explanation section between bar chart and scatter plots -->
+  <div id="explanation">
+    <p><img src="legenda.png" alt="Legendă candidați" style="max-width: 100%; height: auto; display: block; margin: 0 auto;"></p>
+  </div>
+  
+  
+  <div id="scatter-plots"></div>
+
+  
+  <div class="scatter-tooltip" id="scatter-tooltip"></div>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script>
+    
+    let allDataGlobal;
+
+    
+    const width = 1000,
+          height = 700,
+          margin = { top: 50, right: 60, bottom: 60, left: 80 },
+          geoOffsetY = 60; 
+
+    
+    const labelOffset = 70;
+   
+    const baseCircleDiameter = window.innerWidth > 800 ? 8 : 6;
+    const spacing = 2;
+
+    
+    const svg = d3.select("#viz");
+    const tooltip = d3.select("#tooltip");
+
+    
+    const chart = svg.append("g").attr("id", "chartGroup");
+    const labelsGroup = svg.append("g").attr("id", "labelsGroup");
+
+    
+    const winnerColors = {
+      "ION-MARCEL CIOLACU": "#EC626B",
+      "NICOLAE-IONEL CIUCĂ": "#1AA6E3",
+      "ELENA-VALERICA LASCONI": "#7F45AE",
+      "GEORGE-NICOLAE SIMION": "#F5FD42",
+      "HUNOR KELEMEN": "#47C639",
+      "CĂLIN GEORGESCU": "#AA7961"
+    };
+
+    const colorScale = d3.scaleOrdinal()
+                         .domain(Object.keys(winnerColors))
+                         .range(Object.values(winnerColors));
+
+    let isBarChart = false;
+    let circles;
+
+    
+    d3.csv("scatter.csv", d3.autoType).then(data => {
+      allDataGlobal = data;  // save a global copy for resizing
+
+      const xGeo = d3.scaleLinear()
+                     .domain(d3.extent(data, d => d.Long))
+                     .range([margin.left, width - margin.right]);
+      const yGeo = d3.scaleLinear()
+                     .domain(d3.extent(data, d => d.Lat))
+                     .range([height - margin.bottom, margin.top]);
+
+      
+      let winners = Array.from(new Set(data.map(d => d.Castigator)));
+      const candidateCounts = d3.rollup(data, v => v.length, d => d.Castigator);
+      winners.sort((a, b) => candidateCounts.get(b) - candidateCounts.get(a));
+
+      const candidateIndexMap = new Map();
+      winners.forEach((w, i) => candidateIndexMap.set(w, i));
+
+      circles = chart.selectAll("circle")
+                     .data(data)
+                     .enter()
+                     .append("circle")
+                     .attr("r", window.innerWidth > 800 ? 4 : 6)
+                     .attr("cx", d => xGeo(d.Long))
+                     .attr("cy", d => yGeo(d.Lat) + geoOffsetY)
+                     .attr("fill", d => colorScale(d.Castigator) || "#999")
+                     .attr("opacity", 1)
+                     .on("mouseover", function(event, d) {
+                        tooltip.style("opacity", 1)
+                               .html(`
+                                 <strong>${d.jud || "Județ"}</strong><br/>
+                                 <strong>${d.uat || "Comuna"}</strong><br/>
+                                 Câștigător: <strong>${d.Castigator}</strong><br/>
+                                 % castigator: <strong>${d["Procent castigator"]}%</strong><br/>
+                                 Prezență: <strong>${d.Prezenta}%</strong>
+                               `);
+                     })
+                     .on("mousemove", function(event) {
+                        const tipNode = tooltip.node();
+                        const tipRect = tipNode.getBoundingClientRect();
+                        let left = event.pageX + 6;
+                        let top = event.pageY - 10;
+                        if (left + tipRect.width > window.innerWidth) {
+                          left = event.pageX - tipRect.width - 15;
+                        }
+                        if (top < 0) {
+                          top = event.pageY + 15;
+                        }
+                        tooltip.style("left", left + "px")
+                               .style("top", top + "px");
+                     })
+                     .on("mouseout", function() {
+                        tooltip.style("opacity", 0);
+                     });
+
+      
+      const localitatiList = d3.select("#localitati-list");
+      const localitati = Array.from(new Set(data.map(d => d.uat))).filter(Boolean).sort();
+      localitati.forEach(loc => {
+        localitatiList.append("option").attr("value", loc);
+      });
+
+      
+      d3.select("#search-input").on("input", function() {
+        const value = this.value.trim().toLowerCase();
+        circles.transition().duration(300)
+          .attr("opacity", d => d.uat && d.uat.toLowerCase() === value ? 1 : 0.1)
+          .attr("stroke-width", d => d.uat && d.uat.toLowerCase() === value ? 3 : 0)
+          .attr("stroke", d => d.uat && d.uat.toLowerCase() === value ? "#000" : "none");
+      });
+
+      d3.select("#clear-search").on("click", function() {
+        d3.select("#search-input").property("value", "");
+        circles.transition().duration(300)
+          .attr("opacity", 1)
+          .attr("stroke-width", 0)
+          .attr("stroke", "none");
+      });
+
+      
+      const candidateCounters = new Map();
+      winners.forEach(w => candidateCounters.set(w, 0));
+      circles.each(function(d) {
+        d.barIndex = candidateCounters.get(d.Castigator);
+        candidateCounters.set(d.Castigator, d.barIndex + 1);
+      });
+
+      function toMap() {
+        if (isBarChart) {
+          isBarChart = false;
+          circles.transition()
+                 .duration(1500)
+                 .attr("cx", d => xGeo(d.Long))
+                 .attr("cy", d => yGeo(d.Lat) + geoOffsetY)
+                 .attr("r", window.innerWidth > 800 ? 4 : 6);
+          labelsGroup.selectAll(".candidate-label")
+                     .transition()
+                     .duration(600)
+                     .attr("opacity", 0)
+                     .remove();
+        }
+      }
+
+      function toBarChart() {
+        if (!isBarChart) {
+          isBarChart = true;
+          const blockGap = 20;
+          const availableHeight = height - margin.top - margin.bottom - blockGap * (winners.length - 1);
+          const candidateBlockHeight = availableHeight / winners.length;
+          const maxPossibleRows = Math.floor(candidateBlockHeight / (baseCircleDiameter + spacing));
+          const availableWidth = width - margin.left - labelOffset - margin.right;
+
+          let maxGridWidth = 0;
+          winners.forEach(candidate => {
+            const count = candidateCounts.get(candidate);
+            const gridRows = count < maxPossibleRows ? count : maxPossibleRows;
+            const cols = Math.ceil(count / gridRows);
+            const gridWidth = cols * (baseCircleDiameter + spacing);
+            if (gridWidth > maxGridWidth) maxGridWidth = gridWidth;
+          });
+          const scaleFactor = maxGridWidth > availableWidth ? availableWidth / maxGridWidth : 1;
+
+          circles.transition()
+                 .duration(1500)
+                 .attr("cx", function(d) {
+                   const count = candidateCounts.get(d.Castigator);
+                   const gridRows = count < maxPossibleRows ? count : maxPossibleRows;
+                   const col = Math.floor(d.barIndex / gridRows);
+                   return margin.left + labelOffset + col * (baseCircleDiameter + spacing) * scaleFactor;
+                 })
+                 .attr("cy", function(d) {
+                   const count = candidateCounts.get(d.Castigator);
+                   const gridRows = count < maxPossibleRows ? count : maxPossibleRows;
+                   const row = d.barIndex % gridRows;
+                   const candidateIdx = candidateIndexMap.get(d.Castigator);
+                   const candidateBlockTop = margin.top + candidateIdx * (candidateBlockHeight + blockGap);
+                   return candidateBlockTop + row * (baseCircleDiameter + spacing) + baseCircleDiameter / 2;
+                 })
+                 .attr("r", baseCircleDiameter / 2);
+
+          const candidateLabels = labelsGroup.selectAll(".candidate-label")
+                                             .data(winners, d => d);
+          candidateLabels.enter()
+                         .append("text")
+                         .attr("class", "candidate-label")
+                         .attr("x", margin.left + labelOffset - 10)
+                         .attr("y", d => {
+                           const candidateIdx = candidateIndexMap.get(d);
+                           const candidateBlockTop = margin.top + candidateIdx * (candidateBlockHeight + blockGap);
+                           return candidateBlockTop + candidateBlockHeight / 2 + baseCircleDiameter / 2;
+                         })
+                         .attr("text-anchor", "end")
+                         .attr("opacity", 0)
+                         .text(d => `${d} (${candidateCounts.get(d)})`)
+                         .transition()
+                         .duration(1000)
+                         .attr("opacity", 1);
+        }
+      }
+
+      
+      window.addEventListener("scroll", () => {
+        const chartContainer = document.querySelector(".chart-container");
+        const rect = chartContainer.getBoundingClientRect();
+        const threshold = 100;
+        if (rect.top < threshold) {
+          toBarChart();
+        } else {
+          toMap();
+        }
+      });
+      
+      
+      drawScatterPlots(data);
+    });
+
+    
+    function linearRegression(data, xAccessor, yAccessor) {
+      const n = data.length;
+      const sumX = d3.sum(data, xAccessor);
+      const sumY = d3.sum(data, yAccessor);
+      const meanX = sumX / n;
+      const meanY = sumY / n;
+      const numerator = d3.sum(data, d => (xAccessor(d) - meanX) * (yAccessor(d) - meanY));
+      const denominator = d3.sum(data, d => Math.pow(xAccessor(d) - meanX, 2));
+      const slope = numerator / denominator;
+      const intercept = meanY - slope * meanX;
+      return { slope, intercept };
+    }
+
+    
+    function drawScatterPlots(allData) {
+      
+      const xDomain = [0, 130];
+      const yDomain = [0, 100];
+
+      
+      const candidates = Object.keys({
+        "ION-MARCEL CIOLACU": "",
+        "NICOLAE-IONEL CIUCĂ": "",
+        "ELENA-VALERICA LASCONI": "",
+        "GEORGE-NICOLAE SIMION": "",
+        "HUNOR KELEMEN": "",
+        "CĂLIN GEORGESCU": ""
+      });
+      candidates.push("ALTII");
+
+      
+      const container = d3.select("#scatter-plots");
+      const scatterTooltip = d3.select("#scatter-tooltip");
+
+      candidates.forEach(candidate => {
+        
+        container.append("h2")
+                 .text("Raportul dintre prezența la urne și rezultatele obținute de " + candidate);
+        
+        
+        const svgContainer = container.append("div")
+                                      .attr("class", "scatter-svg-container");
+
+        
+        const dropdown = svgContainer.append("select")
+                                     .attr("class", "data-filter")
+                                     .on("change", function() {
+                                       updateScatterPlot(this.value);
+                                     });
+        
+        dropdown.selectAll("option")
+                .data(["NAȚIONAL", "URBAN", "RURAL"])
+                .enter()
+                .append("option")
+                .text(d => d);
+
+        
+        const dataColumn = candidate === "ALTII" ? "ALTII_pct" : candidate + "_pct";
+
+        
+        const containerWidth = svgContainer.node().getBoundingClientRect().width;
+        const scatterWidth = containerWidth;
+        
+        const scatterHeight = scatterWidth * (700 / 1000);
+
+        
+        const isMobile = window.innerWidth < 768;
+        const scatterMargin = isMobile 
+              ? { top: 10, right: 10, bottom: 70, left: 10 }
+              : { top: 50, right: 60, bottom: 60, left: 80 };
+        const xLabelOffset = isMobile ? 20 : 40;
+
+        // Prepare scales and axes.
+        const xScale = d3.scaleLinear()
+                         .domain(xDomain)
+                         .range([scatterMargin.left, scatterWidth - scatterMargin.right]);
+        const yScale = d3.scaleLinear()
+                         .domain(yDomain)
+                         .range([scatterHeight - scatterMargin.bottom, scatterMargin.top]);
+
+        const xAxis = d3.axisBottom(xScale);
+        const yAxis = d3.axisLeft(yScale);
+
+        
+        const svgScatter = svgContainer.append("svg")
+                              .attr("width", "100%")
+                              .attr("height", scatterHeight)
+                              .attr("viewBox", `0 0 ${scatterWidth} ${scatterHeight}`)
+                              .attr("preserveAspectRatio", "xMinYMin");
+
+        
+        svgScatter.append("g")
+                  .attr("class", "x-axis")
+                  .attr("transform", `translate(0, ${scatterHeight - scatterMargin.bottom})`)
+                  .call(xAxis);
+        svgScatter.append("text")
+                  .attr("class", "x-label")
+                  .attr("x", scatterWidth - scatterMargin.right)
+                  .attr("y", scatterHeight - scatterMargin.bottom + xLabelOffset)
+                  .attr("fill", "#000")
+                  .attr("text-anchor", "end")
+                  .text("Prezență (%)");
+
+        svgScatter.append("g")
+                  .attr("class", "y-axis")
+                  .attr("transform", `translate(${scatterMargin.left}, 0)`)
+                  .call(yAxis)
+                  .append("text")
+                  .attr("class", "y-label")
+                  .attr("transform", "rotate(-90)")
+                  .attr("x", -scatterMargin.top)
+                  .attr("y", 15)
+                  .attr("fill", "#000")
+                  .attr("text-anchor", "end")
+                  .text("Rezultate (%)");
+
+        
+        const pointsGroup = svgScatter.append("g").attr("class", "points-group");
+        const trendGroup = svgScatter.append("g").attr("class", "trend-group");
+
+        
+        function updateScatterPlot(filterValue) {
+          let filteredData = allData.filter(d => d.Prezenta != null && d[dataColumn] != null);
+          // "NAȚIONAL" means "all" data; if not, filter by 'Mediu'
+          if (filterValue !== "NAȚIONAL") {
+            filteredData = filteredData.filter(d => d.Mediu === filterValue);
+          }
+          const circles = pointsGroup.selectAll("circle")
+                                      .data(filteredData);
+          circles.exit().remove();
+          circles.enter()
+            .append("circle")
+            .merge(circles)
+            .attr("cx", d => xScale(d.Prezenta))
+            .attr("cy", d => yScale(d[dataColumn]))
+            .attr("r", 4)
+            .attr("fill", d => candidate === "ALTII" ? "#888" : (colorScale(candidate) || "#000"))
+            .attr("fill-opacity", 0.2)
+            .attr("stroke", d => candidate === "ALTII" ? "#888" : (colorScale(candidate) || "#000"))
+            .attr("stroke-opacity", 1)
+            .attr("stroke-width", 1)
+            .on("mouseover", function(event, d) {
+                scatterTooltip.style("opacity", 1)
+                              .html(`<strong>${d.jud || "Județ"}</strong><br/><strong>${d.uat || "Comuna"}</strong><br/>Prezență: ${d.Prezenta}%<br/>Rezultate: ${d[dataColumn]}%`);
+            })
+            .on("mousemove", function(event) {
+                const tipNode = scatterTooltip.node();
+                const tipRect = tipNode.getBoundingClientRect();
+                let left = event.pageX + 15;
+                let top = event.pageY - 40;
+                if (left + tipRect.width > window.innerWidth) {
+                  left = event.pageX - tipRect.width - 15;
+                }
+                if (top < 0) {
+                  top = event.pageY + 15;
+                }
+                scatterTooltip.style("left", left + "px")
+                              .style("top", top + "px");
+            })
+            .on("mouseout", function() {
+                scatterTooltip.style("opacity", 0);
+            });
+
+          
+          trendGroup.selectAll("*").remove();
+          if (filteredData.length > 0) {
+            const { slope, intercept } = linearRegression(filteredData,
+              d => d.Prezenta,
+              d => d[dataColumn]
+            );
+            const x1 = xDomain[0],
+                  x2 = xDomain[1],
+                  y1 = intercept + slope * x1,
+                  y2 = intercept + slope * x2;
+            // Draw trendline.
+            trendGroup.append("line")
+                      .attr("x1", xScale(x1))
+                      .attr("y1", yScale(y1))
+                      .attr("x2", xScale(x2))
+                      .attr("y2", yScale(y2))
+                      .attr("stroke", "black")
+                      .attr("stroke-width", 2)
+                      .attr("stroke-dasharray", "5,5");
+            // Add label "trend" at the end of the trendline.
+            trendGroup.append("text")
+                      .attr("x", xScale(x2))
+                      .attr("y", yScale(y2))
+                      .attr("dy", "-0.5em")
+                      .attr("fill", "black")
+                      .attr("font-size", "0.8em")
+                      .attr("text-anchor", "end")
+                      .text("trend");
+          }
+        }
+        
+        updateScatterPlot("NAȚIONAL");
+      });
+    }
+
+    
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        
+        d3.select("#scatter-plots").html("");
+        
+        if(allDataGlobal) {
+          drawScatterPlots(allDataGlobal);
+        }
+      }, 250);
+    });
+  </script>
+</body>
+</html>
