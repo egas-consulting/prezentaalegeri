@@ -33,13 +33,14 @@
       font-family: 'Playfair Display', serif;
       text-align: center;
       padding: 0 5vw;
-      margin: 0.5em 0 0;
+      margin: 0.5em auto 0;
       font-size: 2em;
       font-weight: 500;
+      max-width: 700px;
     }
     
     .text-container {
-      max-width: 600px;
+      max-width: 700px;
       margin: 0 auto;
       padding: 0 5vw;
       padding-top: 10vw;
@@ -154,17 +155,18 @@
 </head>
 <body>
   
-  <div class="supratitle">Alegeri prezidentiale</div>
-  <h1>Cât de mult influențează prezența rezultatele la alegeri</h1>
+  <div class="supratitle">Alegeri prezidențiale</div>
+  <h1>INTERACTIV | Cât influențează prezența scorul candidaților la alegeri. O analiza a rezultatelor pe toate localitățile din România</h1>
   <div class="text-container">
     <p>
-      În acest material interactiv am corelat 
-      <span style="background-color:rgb(255, 255, 255); color:rgb(0, 0, 0); padding:2px 6px; font-weight:bold;">rezultatele obținute în țară</span> 
-      în primul tur al alegerilor prezidențiale din 
-      <span style="background-color:rgb(255, 255, 255); color:rgb(0, 0, 0); padding:2px 6px; font-weight:bold;">anul 2024</span>. 
-      Am reprezentat distribuția comunelor din punct de vedere al rezultatelor și procentului de prezență, 
-      pentru a vedea dacă există corelații între procentele obținute de candidați și mobilizarea electoratului. <br>
-      <span style="background-color:rgb(255, 255, 255); color:rgb(0, 0, 0); padding:2px 6px; font-weight:bold;">Scroll</span>pentru a urmări materialul.
+      Candidații la alegerile prezidențiale din 2024 au avut rezultate care au variat uneori puternic între mediul rural și urban, dar și prin prisma prezenței la vot. HotNews.ro a analizat toate cele peste 3.000 de localități din România și a corelat datele de prezență cu rezultatul fiecărui candidat la alegeri. 
+La alegerile prezidențiale din noiembrie 2024, rezultatele oficiale au arătat așa:<br><br>
+<strong>Călin Georgescu</strong> - 2.120.401 voturi (22,94%)<br>
+<strong>Elena Lasconi</strong> - 1.772.500 voturi (19,18%)<br>
+<strong>Marcel Ciolacu</strong> - 1.769.760 voturi (19,15%)<br>
+<strong>George Simion</strong> - 1.281.325 voturi (13,86%)<br>
+<strong>Nicolae Ciucă</strong> -  811.952 voturi (8,79%)
+
     </p>
   </div>
 
@@ -195,6 +197,35 @@
   <div style="height: 5dvh;"></div>
 
   <!-- Explanation section between bar chart and scatter plots -->
+  <div class="text-container">
+    <p>
+      <strong><br>Celălalt top al alegerilor prezidențiale<br><br></strong>
+
+      HotNews.ro a analizat rezultatele în toate cele 3.187 de UAT-uri (Unități Administrativ Teritoriale) din țară și a descoperit un alt clasament în funcție de localitățile „câștigate” de candidați, dar și o corelație de cum prezența la vot a însemnat un scor mai bun sau mai slab pentru unii candidați. <br><br>
+      După numărul de localități „câștigate”, topul arată așa: Marcel Ciolacu (1.327), Călin Georgescu (1.031), Nicolae Ciucă (378), Kelemen Hunor (254), George Simion (108) și Elena Lasconi (88). <br><br>
+      
+      Pentru fiecare localitate, HotNews.ro a corelat prezența de scorurile candidaților și a calculat o „linie de trend”.<br><br>
+      
+      Pe fiecare din graficele de mai jos (scatter plots), linia punctată reprezintă o linie de trend, adică o estimare matematică a relației dintre prezența la vot și scorul electoral al candidatului respectiv. <br><br>
+      
+      Mai simplu spus, această linie ne arată dacă există o tendință generală: de exemplu, dacă un candidat obține rezultate mai bune în localitățile unde prezența este mai mare sau, dimpotrivă, dacă performează mai bine acolo unde oamenii merg mai puțin la vot. <br><br>
+      
+      <strong><br>Prezența la vot și rezultatele candidaților<br><br></strong> 
+      
+      O linie ascendentă (orientată în sus de la stânga la dreapta) sugerează că votul candidatului crește odată cu prezența, în timp ce o linie descendentă (orientată în jos de la stânga la dreapta) indică o relație inversă. <br><br>
+      
+      Linia este calculată folosind o metodă numită regresie liniară, o formă simplă de interpolare, în care se trasează o linie dreaptă ce trece printre toate punctele din grafic. Această linie nu prezice rezultatele exact, dar oferă un indiciu despre direcția generală a datelor și ne ajută să înțelegem mai ușor dacă prezența la vot pare să aibă sau nu legătură cu succesul unui candidat.<br><br>
+      
+      Așadar, privind graficele de mai jos, vedem cum Ciolacu și Ciucă au performat la alegerile prezidențiale în special în mediul rural, acolo unde o prezență mai mare la secțiile din satele României însemnau un scor mai bun și pentru cei doi candidați ai celor mai reprezentate partide în teritoriu. <br><br>
+      
+      La popul opus, atât în rural, cât și în urban, George Simion și Călin Georgescu au avut scoruri mai mici în localitățile unde prezența a fost mai ridicată. <br><br>
+      
+      Un caz aparte îl regăsim la Elena Lasconi, acolo linia de trend este aproape neutră, asta pentru că deși a câștigat în doar 88 de localități, ea a adunat grosul voturilor sale în special din mediul urban. Astfel, pe mediul urban, linia de trend este una ascendentă, simbolizând un scor mai bun pe măsură ce prezența a fost mai mare. 
+      
+    </p>
+  </div>
+  
+  
   <div id="explanation">
     <p><img src="legenda.png" alt="Legendă candidați" style="max-width: 100%; height: auto; display: block; margin: 0 auto;"></p>
   </div>
@@ -213,7 +244,7 @@
     
     const width = 1000,
           height = 700,
-          margin = { top: 50, right: 60, bottom: 60, left: 80 },
+          margin = { top: 50, right: 60, bottom: 60, left: 150 },
           geoOffsetY = 60; 
 
     
