@@ -27,7 +27,7 @@
       font-weight: 300;
       color: #000000;
       margin-top: 20px;
-      padding-top: 10vw;
+      padding-top: 1vw;
     }
     h1 {
       font-family: 'Playfair Display', serif;
@@ -102,6 +102,30 @@
     .top-spacer {
       height: 15vh;
     }
+
+    #search-container {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 8px 12px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    @media (max-width: 600px) {
+    #search-container {
+        top: 5px;
+        padding: 6px 10px;
+    }
+    #search-input {
+        width: 180px;
+        font-size: 0.9em;
+    }
+    }
     
     #explanation {
       padding: 20px;
@@ -173,19 +197,20 @@ La alegerile prezidențiale din noiembrie 2024, rezultatele oficiale au arătat 
   <div class="top-spacer"></div>
   
   
-  <div id="search-container" style="text-align: center; margin-bottom: 5px;">
-    <input 
-      type="text" 
-      id="search-input" 
-      placeholder="Caută localitate…" 
-      style="padding: 6px 12px; font-size: 1em; width: 250px; max-width: 90%; border: 1px solid #ccc; border-radius: 5px;" 
-      list="localitati-list"
-    >
-    <button id="clear-search" style="padding: 6px 10px; font-size: 1em; margin-left: 6px;">Reset</button>
-    <datalist id="localitati-list"></datalist>
-  </div>
+  
   <div class="chart-wrapper">
     <div class="chart-container">
+        <div id="search-container" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 2; text-align: center;">
+            <input 
+              type="text" 
+              id="search-input" 
+              placeholder="Caută localitate…" 
+              style="padding: 6px 12px; font-size: 1em; width: 250px; max-width: 90%; border: 1px solid #ccc; border-radius: 5px;" 
+              list="localitati-list"
+            >
+            <button id="clear-search" style="padding: 6px 10px; font-size: 1em; margin-left: 6px;">Reset</button>
+            <datalist id="localitati-list"></datalist>
+          </div>
       <div class="svg-inner">
         <svg id="viz" viewBox="0 0 1000 700" preserveAspectRatio="xMinYMin meet"></svg>
       </div>
@@ -266,7 +291,7 @@ La alegerile prezidențiale din noiembrie 2024, rezultatele oficiale au arătat 
       "ION-MARCEL CIOLACU": "#EC626B",
       "NICOLAE-IONEL CIUCĂ": "#1AA6E3",
       "ELENA-VALERICA LASCONI": "#7F45AE",
-      "GEORGE-NICOLAE SIMION": "#F5FD42",
+      "GEORGE-NICOLAE SIMION": "#EED600",
       "HUNOR KELEMEN": "#47C639",
       "CĂLIN GEORGESCU": "#AA7961"
     };
@@ -595,7 +620,7 @@ La alegerile prezidențiale din noiembrie 2024, rezultatele oficiale au arătat 
             .attr("fill", d => candidate === "ALTII" ? "#888" : (colorScale(candidate) || "#000"))
             .attr("fill-opacity", 0.2)
             .attr("stroke", d => candidate === "ALTII" ? "#888" : (colorScale(candidate) || "#000"))
-            .attr("stroke-opacity", 1)
+            .attr("stroke-opacity", 0.5)
             .attr("stroke-width", 1)
             .on("mouseover", function(event, d) {
                 scatterTooltip.style("opacity", 1)
